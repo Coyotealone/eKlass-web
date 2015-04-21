@@ -1,0 +1,36 @@
+services:
+    coyote_api.admin.guild:
+        class: Coyote\ApiBundle\Admin\GuildAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Guild, CoyoteApiBundle:GuildAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Guild, label: Guild}
+
+    coyote_api.admin.perso:
+        class: Coyote\ApiBundle\Admin\PersoAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Perso, CoyoteApiBundle:PersoAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Perso, label: Perso}
+
+    coyote_api.admin.register:
+        class: Coyote\ApiBundle\Admin\RegisterAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Register, CoyoteApiBundle:RegisterAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Register, label: Register}
+
+    coyote_api.admin.stuff:
+        class: Coyote\ApiBundle\Admin\StuffAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Stuff, CoyoteApiBundle:StuffAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Stuff, label: Stuff}
+
+    coyote_api.admin.boot:
+        class: Coyote\ApiBundle\Admin\BootAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Boot, CoyoteApiBundle:BootAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Stuff, label: Boot}
+
+    coyote_api.admin.helmet:
+        class: Coyote\ApiBundle\Admin\HelmetAdmin
+        arguments: [~, Coyote\ApiBundle\Entity\Helmet, CoyoteApiBundle:HelmetAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: Stuff, label: Helmet}
