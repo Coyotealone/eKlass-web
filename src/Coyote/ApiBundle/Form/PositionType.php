@@ -17,9 +17,10 @@ class PositionType extends AbstractType
         $builder
             ->add('latitude')
             ->add('longitude')
+            ->add('direction')
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

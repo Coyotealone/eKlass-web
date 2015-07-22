@@ -16,6 +16,8 @@ class UserType extends AbstractType
     {
         $builder
             ->add('position')
+            ->add('status')
+            ->add('postedAt')
         ;
     }
     

@@ -35,7 +35,7 @@ class BreakPoint
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -58,7 +58,7 @@ class BreakPoint
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName()
     {
@@ -81,7 +81,7 @@ class BreakPoint
     /**
      * Get position
      *
-     * @return \Coyote\ApiBundle\Entity\Position 
+     * @return \Coyote\ApiBundle\Entity\Position
      */
     public function getPosition()
     {

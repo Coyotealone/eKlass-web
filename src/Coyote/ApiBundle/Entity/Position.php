@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation\Expose;
  * Position
  * @ORM\Entity
  * @ExclusionPolicy("all")
+ * @ORM\Entity(repositoryClass="Coyote\ApiBundle\Entity\PositionRepository");
  */
 class Position
 {
@@ -24,7 +25,7 @@ class Position
     private $id;
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="latitude", type="float")
      * @Expose
@@ -32,12 +33,25 @@ class Position
     private $latitude;
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="longitude", type="float")
      * @Expose
      */
     private $longitude;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="direction", type="string", length=255, nullable=true)
+     * @Expose
+     */
+    private $direction;
+
+    public function __toString()
+    {
+        return (string)$this->id;
+    }
 
     /**
      * Get id
@@ -95,8 +109,26 @@ class Position
         return $this->longitude;
     }
 
-    public function __toString()
+    /**
+     * Set direction
+     *
+     * @param string $direction
+     * @return Position
+     */
+    public function setDirection($direction)
     {
-        return (string)$this->id;
+        $this->direction = $direction;
+
+        return $this;
+    }
+
+    /**
+     * Get direction
+     *
+     * @return string
+     */
+    public function getDirection()
+    {
+        return $this->direction;
     }
 }
