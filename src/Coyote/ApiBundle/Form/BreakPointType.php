@@ -19,7 +19,7 @@ class BreakPointType extends AbstractType
             ->add('position')
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */
