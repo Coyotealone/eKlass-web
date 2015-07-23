@@ -22,8 +22,267 @@ use Symfony\Component\Security\Core\SecurityContextInterface;
 
 class DefaultRestController extends FOSRestController
 {
+    /*****************************************************/
+    /******************** Break Point ********************/
+    /*****************************************************/
+
+    /************************ Get ************************/
+
     /**
-     * @Rest\Get("user")
+     * @Rest\Get("all_break_point")
+     * @ApiDoc(
+     *      section="Break Point Entity",
+     *      description="Get all break point from database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          204 = "No Content",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function getAllBreakPointAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $datas = $em->getRepository("CoyoteApiBundle:BreakPoint")->findAll();
+        if (count($datas) > 0)
+        {
+            $view = $this->view(array(
+                            "BreakPoint" => $datas
+            ),200);
+        }
+        else
+        {
+            $view = $this->view(array(
+                            "message" => "Empty data"
+            ),204);
+        }
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Rest\Get("break_point/{id}")
+     * @ApiDoc(
+     *      section="Break Point Entity",
+     *      description="Get break point by id from database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          404 = "Not Found",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @param integer $id Id of the break point instance.
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function getBreakPointByIdAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
+        if ($entity)
+        {
+            $view = $this->view(array(
+                            "Break Point" => $entity
+            ),200);
+        }
+        else
+        {
+            $view = $this->view(array(
+                            "No Break Point" => $entity
+            ),204);
+        }
+        return $this->handleView($view);
+    }
+
+    /************************ Put ************************/
+
+    /**
+     * @Rest\Put("break_point")
+     * @ApiDoc(
+     *      section="Break Point Entity",
+     *      description="Put break point into database",
+     *      requirements = {
+     *      {
+     *          "name" = "name",
+     *          "dataType" = "string",
+     *          "requirement" = "Arret1|Arret2",
+     *          "description" = "The name of break point"
+     *      },
+     *      {
+     *          "name" = "position",
+     *          "dataType" = "integer",
+     *          "requirement" = "1 | 2",
+     *          "description" = "The id of the position"
+     *      },
+     *      },
+     *      section="Break Point Entity",
+     *      description="Insert new break point into database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function putBreakPointAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = new BreakPoint();
+        $form = $this->createForm(new BreakPointType(), $entity,
+                array('csrf_protection' => false,));
+        $request = $this->getRequest()->request->all();
+        $form->submit($request);
+
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+            $em->flush();
+        }
+
+        if ($entity->getId() > 0)
+        {
+            $view = $this->view(array(
+                            "Break Point create" => $entity
+            ),200);
+        }
+        else{
+            $view = $this->view(array(
+                            "Break Point not create" => $entity
+            ),406);
+        }
+        return $this->handleView($view);
+    }
+
+    /********************** Delete ***********************/
+
+    /**
+     * @Rest\Delete("break_point/{id}")
+     * @ApiDoc(
+     *      section="Break Point Entity",
+     *      description="Remove break point into database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          404 = "Not Found",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @param integer $id Id of the break point instance.
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteBreakPointAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
+        if (!$entity) {
+            $view = $this->view(array(
+                            "Not delete register" => $entity
+            ),404);
+        }
+        else {
+            $form = $this->createForm(new BreakPointType(), $entity,
+                    array('csrf_protection' => false,));
+            $request = $this->getRequest()->request->all();
+            $form->submit($request);
+
+            if ($form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($entity);
+                $em->flush();
+            }
+            $view = $this->view(array(
+                            "Delete break point" => $entity
+            ),200);
+
+        }
+        return $this->handleView($view);
+    }
+
+    /************************ Post ***********************/
+
+    /**
+     * @Rest\Post("break_point/{id}")
+     * @ApiDoc(
+     *      section="Break Point Entity",
+     *      description="Post break point by id from database",
+     *      requirements = {
+     *      {
+     *          "name" = "name",
+     *          "dataType" = "string",
+     *          "requirement" = "Arret1|Arret2",
+     *          "description" = "The name of break point"
+     *      },
+     *      {
+     *          "name" = "position",
+     *          "dataType" = "integer",
+     *          "requirement" = "1 | 2",
+     *          "description" = "The id of the position"
+     *      },
+     *      },
+     *      section="Break Point Entity",
+     *      description="Update break point into database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @param integer $id Id of the break point instance.
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function postBreakPointAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
+        if (!$entity) {
+            $view = $this->view(array(
+                            "Not delete register" => $entity
+            ),404);
+        }
+        else {
+            $form = $this->createForm(new BreakPointType(), $entity,
+                    array('csrf_protection' => false,));
+            $request = $this->getRequest()->request->all();
+            $form->submit($request);
+
+            if ($form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($entity);
+                $em->flush();
+            }
+
+            if ($entity->getId() > 0)
+            {
+                $view = $this->view(array(
+                                "Break Point update" => $entity
+                ),200);
+            }
+            else{
+                $view = $this->view(array(
+                                "Break Point not update" => $entity
+                ),406);
+            }
+        }
+        return $this->handleView($view);
+    }
+
+
+    /*****************************************************/
+    /************************ User ***********************/
+    /*****************************************************/
+
+    /************************ Get ************************/
+
+    /**
+     * @Rest\Get("all_user")
      * @ApiDoc(
      *      section="User Entity",
      *      description="Get all user from database",
@@ -91,40 +350,6 @@ class DefaultRestController extends FOSRestController
     }
 
     /**
-     * @Rest\Get("position")
-     * @ApiDoc(
-     *      section="Position Entity",
-     *      description="Get all position from database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          404 = "Not Found",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getAllPositionAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository("CoyoteApiBundle:Position")->findAll();
-        if (count($entity) > 0)
-        {
-            $view = $this->view(array(
-                            "Positions" => $entity
-            ),200);
-        }
-        else
-        {
-            $view = $this->view(array(
-                            "No Position" => $entity
-            ),204);
-        }
-        return $this->handleView($view);
-    }
-
-    /**
      * @Rest\Get("user/{id}")
      * @ApiDoc(
      *      section="User Entity",
@@ -159,111 +384,13 @@ class DefaultRestController extends FOSRestController
         return $this->handleView($view);
     }
 
-    /**
-     * @Rest\Get("position/{id}")
-     * @ApiDoc(
-     *      section="Position Entity",
-     *      description="Get position by id from database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          404 = "Not Found",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @param integer $id Id of the position instance.
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getPositionByIdAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository("CoyoteApiBundle:Position")->findOneById($id);
-        if ($entity)
-        {
-            $view = $this->view(array(
-                            "Position" => $entity
-            ),200);
-        }
-        else
-        {
-            $view = $this->view(array(
-                            "No Position" => $entity
-            ),204);
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Get("all_break_point")
-     * @ApiDoc(
-     *      section="Break Point Entity",
-     *      description="Get all break point from database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          204 = "No Content",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getAllBreakPointAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $datas = $em->getRepository("CoyoteApiBundle:BreakPoint")->findAll();
-        if (count($datas) > 0)
-        {
-            $view = $this->view(array(
-                            "BreakPoint" => $datas
-            ),200);
-        }
-        else
-        {
-            $view = $this->view(array(
-                            "message" => "Empty Data"
-            ),204);
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Get("breakpoint/{id}")
-     * @ApiDoc(
-     *      section="BreakPoint Entity",
-     *      description="Get breakpoint by id from database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          404 = "Not Found",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @param integer $id Id of the position instance.
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getBreakPointByIdAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
-        if ($entity)
-        {
-            $view = $this->view(array(
-                            "BreakPoint" => $entity
-            ),200);
-        }
-        else
-        {
-            $view = $this->view(array(
-                            "No break point" => $entity
-            ),204);
-        }
-        return $this->handleView($view);
-    }
+    /************************ Put ************************/
 
     /**
      * @Rest\Put("user")
      * @ApiDoc(
+     *      section="User Entity",
+     *      description="Put user into database",
      *      requirements = {
      *      {
      *          "name" = "position",
@@ -319,74 +446,135 @@ class DefaultRestController extends FOSRestController
         return $this->handleView($view);
     }
 
+    /*********************** Delete **********************/
+
     /**
-     * @Rest\Put("position")
+     * @Rest\Delete("user/{id}")
      * @ApiDoc(
-     *      requirements = {
-     *          {
-     *              "name" = "latitude",
-     *              "dataType" = "float",
-     *              "requirement" = "48.1 | -48.1",
-     *              "description" = "The latitude"
-     *          },
-     *          {
-     *              "name" = "longitude",
-     *              "dataType" = "float",
-     *              "requirement" = "-1.667 | 1.667",
-     *              "description" = "The longitude"
-     *          },
-     *          {
-     *              "name" = "direction",
-     *              "dataType" = "string",
-     *              "requirement" = "Bruz | Rennes",
-     *              "description" = "City"
-     *          },
-     *      },
-     *      section="Position Entity",
-     *      description="Insert new position into database",
+     *      section="User Entity",
+     *      description="Remove user into database",
      *      statusCodes = {
      *          200 = "OK",
      *          201 = "Created",
      *          204 = "No Content",
+     *          404 = "Not Found",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @param integer $id Id of the user instance.
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteUserAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $em->getRepository("CoyoteApiBundle:User")->findOneById($id);
+        if (!$entity) {
+            $view = $this->view(array(
+                            "Not delete register" => $entity
+            ),404);
+        }
+        else {
+            $form = $this->createForm(new UserType(), $entity,
+                    array('csrf_protection' => false,));
+            $request = $this->getRequest()->request->all();
+            $form->submit($request);
+
+            if ($form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($entity);
+                $em->flush();
+            }
+            $view = $this->view(array(
+                            "Delete user" => $entity
+            ),200);
+
+        }
+        return $this->handleView($view);
+    }
+
+    /*****************************************************/
+    /********************* Position **********************/
+    /*****************************************************/
+
+    /************************ Get ************************/
+
+    /**
+     * @Rest\Get("all_position")
+     * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Get all position from database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          404 = "Not Found",
      *          406 = "Not Acceptable",
      *      }
      * )
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function putPositionAddAction()
+    public function getAllPositionAction()
     {
         $em = $this->getDoctrine()->getManager();
-
-        $entity = new Position();
-        $form = $this->createForm(new PositionType(), $entity,
-                array('csrf_protection' => false,));
-        $request = $this->getRequest()->request->all();
-        $form->submit($request);
-
-        if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($entity);
-            $em->flush();
-        }
-
-        if ($entity->getId() > 0)
+        $entity = $em->getRepository("CoyoteApiBundle:Position")->findAll();
+        if (count($entity) > 0)
         {
             $view = $this->view(array(
-                            "Break Point create" => $entity
+                            "Positions" => $entity
             ),200);
         }
-        else{
+        else
+        {
             $view = $this->view(array(
-                            "Break Point not create" => $entity
-            ),406);
+                            "No Position" => $entity
+            ),204);
         }
-
         return $this->handleView($view);
     }
 
     /**
+     * @Rest\Get("position/{id}")
+     * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Get position by id from database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          404 = "Not Found",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @param integer $id Id of the position instance.
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function getPositionByIdAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository("CoyoteApiBundle:Position")->findOneById($id);
+        if ($entity)
+        {
+            $view = $this->view(array(
+                            "Position" => $entity
+            ),200);
+        }
+        else
+        {
+            $view = $this->view(array(
+                            "No Position" => $entity
+            ),204);
+        }
+        return $this->handleView($view);
+    }
+
+    /************************ Put ************************/
+
+    /**
      * @Rest\Put("positionUser")
      * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Put user position from database",
      *      requirements = {
      *          {
      *              "name" = "latitude",
@@ -450,28 +638,19 @@ class DefaultRestController extends FOSRestController
                 {
                     if($datas->getPosition()->getDirection() == "Bruz")
                     {
-                        $sql = "Select st_distance('POINT(".$datas->getPosition()->getLatitude()." ".$datas->getPosition()->getLongitude().")'::geography,
-                            'POINT(".$entity->getLatitude()." ".$entity->getLongitude().")'::geography) AS d;";
+                        $sql = "Select st_distance('POINT(".$datas->getPosition()->getLatitude()."
+                                    ".$datas->getPosition()->getLongitude().")'::geography,
+                                    'POINT(".$entity->getLatitude()." ".$entity->getLongitude().")'::geography) AS d;";
                         $box = $db->query($sql)->fetchColumn();
 
                         if($box < 300)
                         {
-                            //$position = $em->getRepository('CoyoteApiBundle:Position')->findOneById($datas->getPosition()->getId());
                             $entity_user->setPosition($datas->getPosition()->getId());
                             $entity_user->setStatus(1);
                             $entity_user->setPostedAt(new \DateTime('NOW'));
-                            //$form_user = $this->createForm(new UserType(), $entity_user, array('csrf_protection' => false,));
-                            //$request = $this->getRequest()->request->all();
-                            //$form_user->submit($request);
-                            //if ($form_user->isValid()) {
-                                $em = $this->getDoctrine()->getManager();
-                                $em->persist($entity_user);
-                                $em->flush();
-                            //}
-                            //if($entity_user->getId() > 0)
-                            //{
-                            //    $point = $entity_user->getId();
-                            //}
+                            $em = $this->getDoctrine()->getManager();
+                            $em->persist($entity_user);
+                            $em->flush();
                         }
                     }
                 }
@@ -483,46 +662,34 @@ class DefaultRestController extends FOSRestController
                 {
                     if($datas->getPosition()->getDirection() == "Rennes")
                     {
-                        $sql = "Select st_distance('POINT(".$datas->getPosition()->getLatitude()." ".$datas->getPosition()->getLongitude().")'::geography,
-                            'POINT(".$entity->getLatitude()." ".$entity->getLongitude().")'::geography) AS d;";
+                        $sql = "Select st_distance('POINT(".$datas->getPosition()->getLatitude()."
+                                    ".$datas->getPosition()->getLongitude().")'::geography,
+                                    'POINT(".$entity->getLatitude()." ".$entity->getLongitude().")'::geography) AS d;";
                         $box = $db->query($sql)->fetchColumn();
                         if($box < 30)
                         {
-                            //$position = $em->getRepository('CoyoteApiBundle:Position')->findOneById($datas->getPosition()->getId());
                             $entity_user->setPosition($datas->getPosition()->getId());
                             $entity_user->setStatus(1);
                             $entity_user->setPostedAt(new \DateTime('NOW'));
-                            //$form_user = $this->createForm(new UserType(), $entity_user, array('csrf_protection' => false,));
-                            //$request = $this->getRequest()->request->all();
-                            //$form_user->submit($request);
-                            //if ($form_user->isValid()) {
-                                $em = $this->getDoctrine()->getManager();
-                                $em->persist($entity_user);
-                                $em->flush();
-                            //}
-                            /*if($entity_user->getId() > 0)
-                            {
-                                $point = $entity_user->getId();
-                            }*/
+                            $em = $this->getDoctrine()->getManager();
+                            $em->persist($entity_user);
+                            $em->flush();
                         }
                     }
                 }
             }
-
-            $message = "KO";//"Vous n etes pas a un point d arret.";
-            $message2 = "OK";//"Vous etes en attente d un vehicule, au point d arret : ";
 
             $point = $entity_user->getId();
 
             if($point == "")
             {
                 $view = $this->view(array(
-                            "Position incorrecte" => $message
+                            "Position incorrecte" => "KO"
                             ),200);
             }
             else
             {    $view = $this->view(array(
-                            "Position correcte" => $message2." ".$point
+                            "Position correcte" => "OK ".$point
                             ),200);
             }
         }
@@ -539,24 +706,26 @@ class DefaultRestController extends FOSRestController
     }
 
     /**
-     * @Rest\Put("break_point")
+     * @Rest\Put("outcampus")
      * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Put out position to campus from database",
      *      requirements = {
-     *      {
-     *          "name" = "name",
-     *          "dataType" = "string",
-     *          "requirement" = "Arret1|Arret2",
-     *          "description" = "The name of break point"
+     *          {
+     *              "name" = "latitude",
+     *              "dataType" = "float",
+     *              "requirement" = "48.1 | -48.1",
+     *              "description" = "The latitude"
+     *          },
+     *          {
+     *              "name" = "longitude",
+     *              "dataType" = "float",
+     *              "requirement" = "-1.667 | 1.667",
+     *              "description" = "The longitude"
+     *          },
      *      },
-     *      {
-     *          "name" = "position",
-     *          "dataType" = "integer",
-     *          "requirement" = "1 | 2",
-     *          "description" = "The id of the position"
-     *      },
-     *      },
-     *      section="Break Point Entity",
-     *      description="Insert new break point into database",
+     *      section="Position Entity",
+     *      description="Check position about the campus",
      *      statusCodes = {
      *          200 = "OK",
      *          201 = "Created",
@@ -566,12 +735,99 @@ class DefaultRestController extends FOSRestController
      * )
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function putBreakPointAction()
+    public function putOutCampusAction()
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = new BreakPoint();
-        $form = $this->createForm(new BreakPointType(), $entity,
+        $entity = new Position();
+        $form = $this->createForm(new PositionType(), $entity,
+                array('csrf_protection' => false,));
+        $request = $this->getRequest()->request->all();
+        $form->submit($request);
+
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($entity);
+            $em->flush();
+        }
+
+        $result = "";
+
+        if ($entity->getId() > 0)
+        {
+            $db = $this->getDoctrine()->getManager()->getConnection();
+
+            $campus = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneByName("Milieu Campus");
+
+            $sql = "Select st_distance('POINT(".$campus->getPosition()->getLatitude()."
+                        ".$campus->getPosition()->getLongitude().")'::geography,'POINT(".$entity->getLatitude()."
+                        ".$entity->getLongitude().")'::geography) AS d;";
+            $box = $db->query($sql)->fetchColumn();
+            if($box > 3000)
+            {
+                $result = "NOK";
+            }
+            else
+            {
+                $result = "OK";
+            }
+
+            $view = $this->view(array("Position" => $result),200);
+        }
+        else
+        {
+            $view = $this->view(array(
+                            "Position not validate" => "error"
+            ),406);
+        }
+        $em->remove($entity);
+        $em->flush();
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Rest\Put("position")
+     * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Put position into database",
+     *      requirements = {
+     *          {
+     *              "name" = "latitude",
+     *              "dataType" = "float",
+     *              "requirement" = "48.1 | -48.1",
+     *              "description" = "The latitude"
+     *          },
+     *          {
+     *              "name" = "longitude",
+     *              "dataType" = "float",
+     *              "requirement" = "-1.667 | 1.667",
+     *              "description" = "The longitude"
+     *          },
+     *          {
+     *              "name" = "direction",
+     *              "dataType" = "string",
+     *              "requirement" = "Bruz | Rennes",
+     *              "description" = "City"
+     *          },
+     *      },
+     *      section="Position Entity",
+     *      description="Insert new position into database",
+     *      statusCodes = {
+     *          200 = "OK",
+     *          201 = "Created",
+     *          204 = "No Content",
+     *          406 = "Not Acceptable",
+     *      }
+     * )
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function putPositionAddAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = new Position();
+        $form = $this->createForm(new PositionType(), $entity,
                 array('csrf_protection' => false,));
         $request = $this->getRequest()->request->all();
         $form->submit($request);
@@ -593,79 +849,64 @@ class DefaultRestController extends FOSRestController
                             "Break Point not create" => $entity
             ),406);
         }
+
         return $this->handleView($view);
     }
 
+    /*********************** Delete **********************/
+
     /**
-     * @Rest\Post("user/{id}")
+     * @Rest\Delete("position/{id}")
      * @ApiDoc(
-     *      requirements = {
-     *      {
-     *          "name" = "position",
-     *          "dataType" = "integer",
-     *          "requirement" = "1 | 2",
-     *          "description" = "The id of the position"
-     *      },
-     *      {
-     *          "name" = "status",
-     *          "dataType" = "integer",
-     *          "requirement" = "0 | 1",
-     *          "description" = "Status 1 Up or 0 Down"
-     *      },
-     *      },
-     *      section="User Entity",
-     *      description="Update user into database",
+     *      section="Position Entity",
+     *      description="Remove position into database",
      *      statusCodes = {
      *          200 = "OK",
      *          201 = "Created",
      *          204 = "No Content",
+     *          404 = "Not Found",
      *          406 = "Not Acceptable",
      *      }
      * )
-     * @param integer $id Id of the user instance.
+     * @param integer $id Id of the position instance.
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    /*public function postUserAction($id)
+    public function deletePositionAction($id)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $em->getRepository("CoyoteApiBundle:User")->findOneById($id);
+        $entity = $em->getRepository("CoyoteApiBundle:Position")->findOneById($id);
         if (!$entity) {
             $view = $this->view(array(
                             "Not delete register" => $entity
             ),404);
         }
         else {
-            $form = $this->createForm(new UserType(), $entity,
+            $form = $this->createForm(new PositionType(), $entity,
                     array('csrf_protection' => false,));
             $request = $this->getRequest()->request->all();
             $form->submit($request);
 
             if ($form->isValid()) {
                 $em = $this->getDoctrine()->getManager();
-
-                $em->persist($entity);
+                $em->remove($entity);
                 $em->flush();
             }
+            $view = $this->view(array(
+                            "Delete position" => $entity
+            ),200);
 
-            if ($entity->getId() > 0)
-            {
-                $view = $this->view(array(
-                                "User update" => $entity
-                ),200);
-            }
-            else{
-                $view = $this->view(array(
-                                "User not update" => $entity
-                ),406);
-            }
         }
         return $this->handleView($view);
-    }*/
+    }
+
+    /************************ Post ***********************/
 
     /**
      * @Rest\Post("position/{id}")
      * @ApiDoc(
+     *      section="Position Entity",
+     *      description="Post position by id from database",
      *      requirements = {
      *      {
      *          "name" = "latitude",
@@ -735,134 +976,42 @@ class DefaultRestController extends FOSRestController
         return $this->handleView($view);
     }
 
+    /*****************************************************/
+    /********************** Bordel ***********************/
+    /*****************************************************/
+
     /**
-     * @Rest\Post("break_point/{id}")
+     * @Rest\Post("user/{id}")
      * @ApiDoc(
+     *      section="User Entity",
+     *      description="Post user by id from database",
      *      requirements = {
-     *      {
-     *          "name" = "name",
-     *          "dataType" = "string",
-     *          "requirement" = "Arret1|Arret2",
-     *          "description" = "The name of break point"
-     *      },
      *      {
      *          "name" = "position",
      *          "dataType" = "integer",
      *          "requirement" = "1 | 2",
      *          "description" = "The id of the position"
      *      },
+     *      {
+     *          "name" = "status",
+     *          "dataType" = "integer",
+     *          "requirement" = "0 | 1",
+     *          "description" = "Status 1 Up or 0 Down"
      *      },
-     *      section="Break Point Entity",
-     *      description="Update break point into database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @param integer $id Id of the break point instance.
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function postBreakPointAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
-        if (!$entity) {
-            $view = $this->view(array(
-                            "Not delete register" => $entity
-            ),404);
-        }
-        else {
-            $form = $this->createForm(new BreakPointType(), $entity,
-                    array('csrf_protection' => false,));
-            $request = $this->getRequest()->request->all();
-            $form->submit($request);
-
-            if ($form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($entity);
-                $em->flush();
-            }
-
-            if ($entity->getId() > 0)
-            {
-                $view = $this->view(array(
-                                "Break Point update" => $entity
-                ),200);
-            }
-            else{
-                $view = $this->view(array(
-                                "Break Point not update" => $entity
-                ),406);
-            }
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Delete("position/{id}")
-     * @ApiDoc(
-     *      section="Position Entity",
-     *      description="Remove position into database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          404 = "Not Found",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @param integer $id Id of the position instance.
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function deletePositionAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $entity = $em->getRepository("CoyoteApiBundle:Position")->findOneById($id);
-        if (!$entity) {
-            $view = $this->view(array(
-                            "Not delete register" => $entity
-            ),404);
-        }
-        else {
-            $form = $this->createForm(new PositionType(), $entity,
-                    array('csrf_protection' => false,));
-            $request = $this->getRequest()->request->all();
-            $form->submit($request);
-
-            if ($form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($entity);
-                $em->flush();
-            }
-            $view = $this->view(array(
-                            "Delete position" => $entity
-            ),200);
-
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Delete("user/{id}")
-     * @ApiDoc(
+     *      },
      *      section="User Entity",
-     *      description="Remove user into database",
+     *      description="Update user into database",
      *      statusCodes = {
      *          200 = "OK",
      *          201 = "Created",
      *          204 = "No Content",
-     *          404 = "Not Found",
      *          406 = "Not Acceptable",
      *      }
      * )
      * @param integer $id Id of the user instance.
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function deleteUserAction($id)
+    /*public function postUserAction($id)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -880,137 +1029,24 @@ class DefaultRestController extends FOSRestController
 
             if ($form->isValid()) {
                 $em = $this->getDoctrine()->getManager();
-                $em->remove($entity);
+
+                $em->persist($entity);
                 $em->flush();
             }
-            $view = $this->view(array(
-                            "Delete user" => $entity
-            ),200);
 
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Delete("breakpoint/{id}")
-     * @ApiDoc(
-     *      section="Break Point Entity",
-     *      description="Remove break point into database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          404 = "Not Found",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @param integer $id Id of the break point instance.
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function deleteBreakPointAction($id)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $entity = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneById($id);
-        if (!$entity) {
-            $view = $this->view(array(
-                            "Not delete register" => $entity
-            ),404);
-        }
-        else {
-            $form = $this->createForm(new BreakPointType(), $entity,
-                    array('csrf_protection' => false,));
-            $request = $this->getRequest()->request->all();
-            $form->submit($request);
-
-            if ($form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($entity);
-                $em->flush();
-            }
-            $view = $this->view(array(
-                            "Delete break point" => $entity
-            ),200);
-
-        }
-        return $this->handleView($view);
-    }
-
-    /**
-     * @Rest\Put("outcampus")
-     * @ApiDoc(
-     *      requirements = {
-     *          {
-     *              "name" = "latitude",
-     *              "dataType" = "float",
-     *              "requirement" = "48.1 | -48.1",
-     *              "description" = "The latitude"
-     *          },
-     *          {
-     *              "name" = "longitude",
-     *              "dataType" = "float",
-     *              "requirement" = "-1.667 | 1.667",
-     *              "description" = "The longitude"
-     *          },
-     *      },
-     *      section="Position Entity",
-     *      description="Check position into database",
-     *      statusCodes = {
-     *          200 = "OK",
-     *          201 = "Created",
-     *          204 = "No Content",
-     *          406 = "Not Acceptable",
-     *      }
-     * )
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function putOutCampusAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $entity = new Position();
-        $form = $this->createForm(new PositionType(), $entity,
-                array('csrf_protection' => false,));
-        $request = $this->getRequest()->request->all();
-        $form->submit($request);
-
-        if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($entity);
-            $em->flush();
-        }
-
-        $result = "";
-
-        if ($entity->getId() > 0)
-        {
-            $db = $this->getDoctrine()->getManager()->getConnection();
-
-            $campus = $em->getRepository("CoyoteApiBundle:BreakPoint")->findOneByName("Milieu Campus");
-
-            $sql = "Select st_distance('POINT(".$campus->getPosition()->getLatitude()." ".$campus->getPosition()->getLongitude().")'::geography,
-                'POINT(".$entity->getLatitude()." ".$entity->getLongitude().")'::geography) AS d;";
-            $box = $db->query($sql)->fetchColumn();
-            if($box > 30000)
+            if ($entity->getId() > 0)
             {
-                $result = "NOK";
+                $view = $this->view(array(
+                                "User update" => $entity
+                ),200);
             }
-            else
-            {
-                $result = "OK";
+            else{
+                $view = $this->view(array(
+                                "User not update" => $entity
+                ),406);
             }
-
-            $view = $this->view(array("Position" => $result),200);
         }
-        else
-        {
-            $view = $this->view(array(
-                            "Position not validate" => "error"
-            ),406);
-        }
-        $em->remove($entity);
-        $em->flush();
-
         return $this->handleView($view);
-    }
+    }*/
+
 }

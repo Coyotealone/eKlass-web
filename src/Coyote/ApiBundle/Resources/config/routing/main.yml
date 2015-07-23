@@ -1,3 +1,0 @@
-main:
-    pattern:    /
-    defaults:   { _controller: "CoyoteApiBundle:Main:test" }

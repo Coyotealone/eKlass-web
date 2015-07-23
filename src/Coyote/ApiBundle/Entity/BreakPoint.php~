@@ -1,0 +1,34 @@
+<?php
+
+namespace Coyote\ApiBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * BreakPoint
+ * @ORM\Entity
+ */
+class BreakPoint
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255)
+     */
+    private $name;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Position")
+     * @ORM\JoinColumn(name="position_id", referencedColumnName="id")
+     */
+    private $position;
+}
